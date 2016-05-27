@@ -1,0 +1,36 @@
+{
+  "name": "stremio-twitch",
+  "displayName": "Twitch.tv",
+  "version": "0.0.1",
+  "description": "Live Streams from Twitch.tv",
+  "main": "twitch.js",
+  "scripts": {
+    "test": "tape test/*",
+    "start": "node ./twitch.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/jaruba/stremio-twitch"
+  },
+  "keywords": [
+    "twitch",
+    "stremio",
+    "stremio-addons"
+  ],
+  "author": "Alexandru Branza <branza.alex@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jaruba/stremio-twitch/issues"
+  },
+  "homepage": "https://github.com/jaruba/stremio-twitch",
+  "dependencies": {
+    "bagpipe": "Ivshti/bagpipe",
+    "catch-my-exceptions": "^1.0.1",
+    "lodash": "^3.10.1",
+    "needle": "^0.11.0",
+    "stremio-addons": "^1.30.0"
+  },
+  "devDependencies": {
+    "tape": "4.x.x"
+  }
+}
