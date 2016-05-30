@@ -45,6 +45,7 @@ function twitchStreams(cb) {
                     twitch_id: el.channel._id,
                     name: el.channel.status,
                     poster: el.preview.medium,
+                    posterShape: 'landscape',
                     backgroundShape: 'contain',
                     logoShape: 'hidden',
                     banner: el.channel.video_banner || el.preview.template.replace('{width}', '1920').replace('{height}', '1080'),
