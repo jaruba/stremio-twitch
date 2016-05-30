@@ -15,7 +15,6 @@ var manifest = {
     "filter": { "query.twitch_id": { "$exists": true }, "query.type": { "$in":["tv"] } },
     icon: "http://s.jtvnw.net/jtv_user_pictures/hosted_images/GlitchIcon_purple.png",
     logo: "https://rack1.chipmeup.com/assets/twitch/logo-cd148048b88ce417a0c815548e7e4681.png",
-    posterShape: { tv: "square" }, 
     repository: "http://github.com/jaruba/stremio-twitch",
     endpoint: "http://twitch.strem.io/stremioget/stremio/v1",
     name: pkg.displayName, version: pkg.version, description: pkg.description,
@@ -90,19 +89,29 @@ function getStream(args, callback) {
 }
 
 function getMeta(args, callback) {
-    twitchStreams(function(err, chans) {
-        if (err) cb(err);
-        else {
-            callback(null, args.limit ? chans.slice(0, args.limit) : chans);
-        }
-    });
+    if (args.query.twitch_id) {
+        var found = twitch_chans.some( function(el) {
+            if (el.twitch_id == args.query.twitch_id) {
+                callback(null, [el]);
+                return true;
+            }
+        });
+        !found && callback(new Error("Item Not Found"));
+    } else {
+        twitchStreams(function(err, chans) {
+            if (err) cb(err);
+            else {
+                callback(null, args.limit ? chans.slice(0, args.limit) : chans);
+            }
+        });
+    }
 }
 var addon = new Stremio.Server({
     "stream.get": function(args, callback, user) {
         pipe.push(getStream, args, function(err, resp) { callback(err, resp ? (resp[0] || null) : undefined) })
     },
     "stream.find": function(args, callback, user) {
-        pipe.push(getStream, args, function(err, resp) { callback(err, resp ? resp.slice(0, 4) : undefined) }); 
+        pipe.push(getStream, args, function(err, resp) { callback(err, resp || undefined) })
     },
     "meta.get": function(args, callback, user) {
         args.projection = args.projection || { }; // full
