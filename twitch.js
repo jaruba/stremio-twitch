@@ -23,25 +23,25 @@ var manifest = {
 };
 
 var pipe = new bagpipe(1);
+var pages = [];
 
 // Get all channels
-function twitchStreams(cb) {
-    if (twitch_chans.length && cb) {
-        cb(null, twitch_chans);
+function twitchStreams(cb, offset) {
+    if (twitch_chans[offset] && twitch_chans[offset].length && cb) {
+        cb(null, twitch_chans[offset]);
         return;
     }
-    needle.get('https://api.twitch.tv/kraken/streams', function(err, res) {
+    needle.get('https://api.twitch.tv/kraken/streams?limit=75\u0026offset=' + (offset * 75), function(err, res) {
         if (err) {
             cb && cb(err);
             return;
         }
-        twitch_chans = [];
-        chanName = [];
+        twitch_chans[offset] = [];
         if (res && res.body && res.body.streams && res.body.streams.length) {
             var channel = res.body.streams[0].channel.name;
             res.body.streams.forEach( function(el, ij) {
                 chanName[el.channel._id] = el.channel.name;
-                twitch_chans.push({
+                twitch_chans[offset].push({
                     twitch_id: el.channel._id,
                     name: el.channel.status,
                     poster: el.preview.medium,
@@ -56,7 +56,7 @@ function twitchStreams(cb) {
                     type: 'tv'
                 });
             });
-            cb && cb(null, twitch_chans);
+            cb && cb(null, twitch_chans[offset]);
         }
     });
 }
@@ -90,12 +90,15 @@ function getStream(args, callback) {
 }
 
 function getMeta(args, callback) {
+    var offset = args.skip || 0;
     if (args.query.twitch_id) {
-        var found = twitch_chans.some( function(el) {
-            if (el.twitch_id == args.query.twitch_id) {
-                callback(null, [el]);
-                return true;
-            }
+        var found = twitch_chans.some( function(chans) {
+            return chans.some( function(el) {
+                if (el.twitch_id == args.query.twitch_id) {
+                    callback(null, [el]);
+                    return true;
+                }
+            });
         });
         !found && callback(new Error("Item Not Found"));
     } else {
@@ -104,7 +107,7 @@ function getMeta(args, callback) {
             else {
                 callback(null, args.limit ? chans.slice(0, args.limit) : chans);
             }
-        });
+        }, offset);
     }
 }
 var addon = new Stremio.Server({
