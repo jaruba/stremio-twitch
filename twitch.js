@@ -145,7 +145,7 @@ var server = require("http").createServer(function (req, res) {
     console.log("Twitch.tv Stremio Addon listening on "+server.address().port);
 })
 if (module.parent) module.exports = server;
-else server.listen(process.env.PORT || 9005);
+else server.listen(process.env.PORT || 9028);
 
 var catchMyExceptions = require('catch-my-exceptions');
 if (process.env.SLACK_HOOK) catchMyExceptions(process.env.SLACK_HOOK, { slackUsername: "twitch" });
