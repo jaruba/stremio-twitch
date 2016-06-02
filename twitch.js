@@ -1,7 +1,6 @@
 var Stremio = require("stremio-addons");
 var needle = require("needle");
 var _ = require("lodash");
-var bagpipe = require("bagpipe");
 
 var twitch_chans = [];
 
@@ -21,7 +20,6 @@ var manifest = {
     sorts: [{prop: "popularities.twitch", name: "Twitch.tv", types:["tv"]}]
 };
 
-var pipe = new bagpipe(1);
 var expire = [];
 
 // Get all channels
@@ -169,11 +167,11 @@ function getMeta(args, callback) {
 }
 var addon = new Stremio.Server({
     "stream.find": function(args, callback, user) {
-        pipe.push(getStream, args, function(err, resp) { callback(err, resp || undefined) })
+        getStream(args, function(err, resp) { callback(err, resp || undefined) })
     },
     "meta.get": function(args, callback, user) {
         args.projection = args.projection || { }; // full
-        pipe.push(getMeta, _.extend(args, { limit: 1 }), function(err, res) { 
+        getMeta(_.extend(args, { limit: 1 }), function(err, res) { 
             if (err) return callback(err);
 
             res = res && res[0];
@@ -183,10 +181,10 @@ var addon = new Stremio.Server({
         });
     },
     "meta.search": function(args, callback, user) {
-        pipe.push(searchMeta, args, callback);
+        searchMeta(args, callback);
     },
     "meta.find": function(args, callback, user) {
-        pipe.push(getMeta, args, callback); // push to pipe so we wait for channels to be crawled
+        getMeta(args, callback); // push to pipe so we wait for channels to be crawled
     }
 }, { stremioget: true, cacheTTL: { "meta.find": 30*60, "stream.find": 19*60, "meta.get": 4*60*60 }, allow: ["http://api8.herokuapp.com","http://api9.strem.io"] /* secret: mySecret */ }, manifest);
 
