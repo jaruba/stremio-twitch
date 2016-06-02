@@ -58,7 +58,8 @@ function twitchStreams(cb, limit, offset) {
             });
             expire[offset] = Date.now() + 1800000; // expire in 30 mins
             cb && cb(null, twitch_chans[offset]);
-        }
+        } else if (cb)
+            cb(new Error('Network Error'));
     });
 }
 
@@ -91,7 +92,8 @@ function searchMeta(args, cb) {
                 });
             });
             cb && cb(null, { results: results, query: args.query });
-        }
+        } else if (cb)
+            cb(new Error('Network Error'));
     });
 }
 
@@ -117,7 +119,8 @@ function getStream(args, callback) {
                     isFree: 1,
                     twitch_id: args.query.twitch_id
                 }]);
-            }
+            } else if (callback)
+                callback(new Error('Network Error'));
         });
     } else
         callback(new Error('Stream Missing'))
@@ -154,13 +157,13 @@ function getMeta(args, callback) {
                         isFree: 1,
                         type: 'tv'
                     }]);
-                } else
+                } else if (callback)
                     callback(new Error('No Results'));
             });
         }
     } else {
         twitchStreams(function(err, chans) {
-            if (err) cb(err);
+            if (err) callback(err);
             else {
                 callback(null, args.limit ? chans.slice(0, args.limit) : chans);
             }
