@@ -46,7 +46,7 @@ function twitchStreams(cb, offset) {
             res.body.streams.forEach( function(el, ij) {
                 chanName[el.channel._id] = el.channel.name;
                 twitch_chans[offset].push({
-                    twitch_id: el.channel._id,
+                    id: 'twitch_id:' + el.channel._id,
                     name: el.channel.status,
                     poster: el.preview.medium,
                     posterShape: 'landscape',
@@ -99,7 +99,7 @@ function getMeta(args, callback) {
     if (args.query.twitch_id) {
         var found = twitch_chans.some( function(chans) {
             return chans.some( function(el) {
-                if (el.twitch_id == args.query.twitch_id) {
+                if (el.id == 'twitch_id:' + args.query.twitch_id) {
                     callback(null, [el]);
                     return true;
                 }
