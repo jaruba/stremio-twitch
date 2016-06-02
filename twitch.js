@@ -26,7 +26,7 @@ var pipe = new bagpipe(1);
 var expire = [];
 
 // Get all channels
-function twitchStreams(cb, offset) {
+function twitchStreams(cb, limit, offset) {
 
     if (expire[offset] && expire[offset] > Date.now()) {
         if (twitch_chans[offset] && twitch_chans[offset].length && cb) {
@@ -35,7 +35,7 @@ function twitchStreams(cb, offset) {
         }
     }
 
-    needle.get('https://api.twitch.tv/kraken/streams?limit=75\u0026offset=' + (offset * 75), function(err, res) {
+    needle.get('https://api.twitch.tv/kraken/streams?limit=' + (limit || 75) + '\u0026offset=' + (offset || 0), function(err, res) {
         if (err) {
             cb && cb(err);
             return;
@@ -66,8 +66,6 @@ function twitchStreams(cb, offset) {
     });
 }
 
-pipe.push(twitchStreams);
-
 function getStream(args, callback) {
     var channel = chanName[args.query.twitch_id];
     if (channel) {
@@ -96,6 +94,7 @@ function getStream(args, callback) {
 
 function getMeta(args, callback) {
     var offset = args.skip || 0;
+	var limit = args.limit || 75;
     if (args.query.twitch_id) {
         var found = twitch_chans.some( function(chans) {
             return chans.some( function(el) {
@@ -112,14 +111,18 @@ function getMeta(args, callback) {
             else {
                 callback(null, args.limit ? chans.slice(0, args.limit) : chans);
             }
-        }, offset);
+        }, limit, offset);
     }
 }
 var addon = new Stremio.Server({
     "stream.find": function(args, callback, user) {
+		console.log('stream.find');
+		console.log(args);
         pipe.push(getStream, args, function(err, resp) { callback(err, resp || undefined) })
     },
     "meta.get": function(args, callback, user) {
+		console.log('meta.get');
+		console.log(args);
         args.projection = args.projection || { }; // full
         pipe.push(getMeta, _.extend(args, { limit: 1 }), function(err, res) { 
             if (err) return callback(err);
@@ -131,6 +134,8 @@ var addon = new Stremio.Server({
         });
     },
     "meta.find": function(args, callback, user) {
+		console.log('meta.find');
+		console.log(args);
         pipe.push(getMeta, args, callback); // push to pipe so we wait for channels to be crawled
     }
 }, { stremioget: true, cacheTTL: { "meta.find": 30*60, "stream.find": 19*60, "meta.get": 4*60*60 }, allow: ["http://api8.herokuapp.com","http://api9.strem.io"] /* secret: mySecret */ }, manifest);
