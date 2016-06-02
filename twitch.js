@@ -4,7 +4,6 @@ var _ = require("lodash");
 var bagpipe = require("bagpipe");
 
 var twitch_chans = [];
-var chanName = [];
 
 var stremioCentral = "http://api9.strem.io";
 
@@ -44,9 +43,8 @@ function twitchStreams(cb, limit, offset) {
         if (res && res.body && res.body.streams && res.body.streams.length) {
             var channel = res.body.streams[0].channel.name;
             res.body.streams.forEach( function(el, ij) {
-                chanName[el.channel._id] = el.channel.name;
                 twitch_chans[offset].push({
-                    id: 'twitch_id:' + el.channel._id,
+                    id: 'twitch_id:' + el.channel.name,
                     name: el.channel.status,
                     poster: el.preview.medium,
                     posterShape: 'landscape',
@@ -79,9 +77,8 @@ function searchMeta(args, cb) {
         if (res && res.body && res.body.streams && res.body.streams.length) {
             var channel = res.body.streams[0].channel.name;
             res.body.streams.forEach( function(el, ij) {
-                chanName[el.channel._id] = el.channel.name;
                 results.push({
-                    id: 'twitch_id:' + el.channel._id,
+                    id: 'twitch_id:' + el.channel.name,
                     name: el.channel.status,
                     poster: el.preview.medium,
                     posterShape: 'landscape',
@@ -101,7 +98,7 @@ function searchMeta(args, cb) {
 }
 
 function getStream(args, callback) {
-    var channel = chanName[args.query.twitch_id];
+    var channel = args.query.twitch_id;
     if (channel) {
         needle.get('http://api.twitch.tv/api/channels/' + channel + '/access_token', function(err, res) {
             if (err) {
@@ -138,7 +135,29 @@ function getMeta(args, callback) {
                 }
             });
         });
-        !found && callback(new Error("Item Not Found"));
+        if (!found) {
+            needle.get('http://api.twitch.tv/api/channels/' + args.query.twitch_id, function(err, res) {
+                if (err) {
+                    callback(err);
+                    return;
+                }
+                if (res && res.body) {
+                    callback(null, [{
+                        id: 'twitch_id:' + args.query.twitch_id,
+                        name: res.body.status,
+                        poster: res.body.video_banner,
+                        posterShape: 'landscape',
+                        backgroundShape: 'contain',
+                        logoShape: 'hidden',
+                        banner: res.body.video_banner,
+                        genre: [ 'Entertainment' ],
+                        isFree: 1,
+                        type: 'tv'
+                    }]);
+                } else
+                    callback(new Error('No Results'));
+            });
+        }
     } else {
         twitchStreams(function(err, chans) {
             if (err) cb(err);
