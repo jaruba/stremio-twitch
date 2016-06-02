@@ -66,6 +66,40 @@ function twitchStreams(cb, limit, offset) {
     });
 }
 
+function searchMeta(args, cb) {
+
+    var searcher = encodeURIComponent(args.query).split('%20').join('+');
+
+    needle.get('https://api.twitch.tv/kraken/search/streams?limit=' + (args.limit || 75) + '&offset=' + (args.skip || 0) + '&q=' + searcher, function(err, res) {
+        if (err) {
+            cb && cb(err);
+            return;
+        }
+        var results = [];
+        if (res && res.body && res.body.streams && res.body.streams.length) {
+            var channel = res.body.streams[0].channel.name;
+            res.body.streams.forEach( function(el, ij) {
+                chanName[el.channel._id] = el.channel.name;
+                results.push({
+                    id: 'twitch_id:' + el.channel._id,
+                    name: el.channel.status,
+                    poster: el.preview.medium,
+                    posterShape: 'landscape',
+                    backgroundShape: 'contain',
+                    logoShape: 'hidden',
+                    banner: el.channel.video_banner || el.preview.template.replace('{width}', '1920').replace('{height}', '1080'),
+                    genre: [ 'Entertainment' ],
+                    isFree: 1,
+                    popularity: el.viewers,
+                    popularities: { twitch: el.viewers },
+                    type: 'tv'
+                });
+            });
+            cb && cb(null, { results: results, query: args.query });
+        }
+    });
+}
+
 function getStream(args, callback) {
     var channel = chanName[args.query.twitch_id];
     if (channel) {
@@ -128,6 +162,9 @@ var addon = new Stremio.Server({
 
             callback(null, res);
         });
+    },
+    "meta.search": function(args, callback, user) {
+        pipe.push(searchMeta, args, callback);
     },
     "meta.find": function(args, callback, user) {
         pipe.push(getMeta, args, callback); // push to pipe so we wait for channels to be crawled
