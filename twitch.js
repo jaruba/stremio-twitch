@@ -23,14 +23,18 @@ var manifest = {
 };
 
 var pipe = new bagpipe(1);
-var pages = [];
+var expire = [];
 
 // Get all channels
 function twitchStreams(cb, offset) {
-    if (twitch_chans[offset] && twitch_chans[offset].length && cb) {
-        cb(null, twitch_chans[offset]);
-        return;
+
+    if (expire[offset] && expire[offset] > Date.now()) {
+        if (twitch_chans[offset] && twitch_chans[offset].length && cb) {
+            cb(null, twitch_chans[offset]);
+            return;
+        }
     }
+
     needle.get('https://api.twitch.tv/kraken/streams?limit=75\u0026offset=' + (offset * 75), function(err, res) {
         if (err) {
             cb && cb(err);
@@ -56,6 +60,7 @@ function twitchStreams(cb, offset) {
                     type: 'tv'
                 });
             });
+            expire[offset] = Date.now() + 7200000; // expire in 2 hours
             cb && cb(null, twitch_chans[offset]);
         }
     });
@@ -131,7 +136,7 @@ var addon = new Stremio.Server({
     "meta.find": function(args, callback, user) {
         pipe.push(getMeta, args, callback); // push to pipe so we wait for channels to be crawled
     }
-}, { stremioget: true, cacheTTL: { "meta.find": 30*60, "stream.find": 30*60, "meta.get": 4*60*60 }, allow: ["http://api8.herokuapp.com","http://api9.strem.io"] /* secret: mySecret */ }, manifest);
+}, { stremioget: true, cacheTTL: { "meta.find": 2*60, "stream.find": 19, "meta.get": 4*60*60 }, allow: ["http://api8.herokuapp.com","http://api9.strem.io"] /* secret: mySecret */ }, manifest);
 
 var server = require("http").createServer(function (req, res) {
     addon.middleware(req, res, function() { res.end() }); // wire the middleware - also compatible with connect / express
