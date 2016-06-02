@@ -133,7 +133,7 @@ function getMeta(args, callback) {
         var found = twitch_chans.some( function(chans) {
             return chans.some( function(el) {
                 if (el.id == 'twitch_id:' + args.query.twitch_id) {
-                    callback(null, [el]);
+                    callback(null, el);
                     return true;
                 }
             });
@@ -145,7 +145,7 @@ function getMeta(args, callback) {
                     return;
                 }
                 if (res && res.body) {
-                    callback(null, [{
+                    callback(null, {
                         id: 'twitch_id:' + args.query.twitch_id,
                         name: res.body.status,
                         poster: res.body.video_banner,
@@ -156,7 +156,7 @@ function getMeta(args, callback) {
                         genre: [ 'Entertainment' ],
                         isFree: 1,
                         type: 'tv'
-                    }]);
+                    });
                 } else if (callback)
                     callback(new Error('No Results'));
             });
@@ -171,26 +171,10 @@ function getMeta(args, callback) {
     }
 }
 var addon = new Stremio.Server({
-    "stream.find": function(args, callback, user) {
-        getStream(args, function(err, resp) { callback(err, resp || undefined) })
-    },
-    "meta.get": function(args, callback, user) {
-        args.projection = args.projection || { }; // full
-        getMeta(_.extend(args, { limit: 1 }), function(err, res) { 
-            if (err) return callback(err);
-
-            res = res && res[0];
-            if (! res) return callback(null, null);
-
-            callback(null, res);
-        });
-    },
-    "meta.search": function(args, callback, user) {
-        searchMeta(args, callback);
-    },
-    "meta.find": function(args, callback, user) {
-        getMeta(args, callback); // push to pipe so we wait for channels to be crawled
-    }
+    "stream.find": getStream,
+    "meta.get": getMeta,
+    "meta.search": searchMeta,
+    "meta.find": getMeta
 }, { stremioget: true, cacheTTL: { "meta.find": 30*60, "stream.find": 19*60, "meta.get": 4*60*60 }, allow: ["http://api8.herokuapp.com","http://api9.strem.io"] /* secret: mySecret */ }, manifest);
 
 var server = require("http").createServer(function (req, res) {
