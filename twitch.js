@@ -116,9 +116,6 @@ function getMeta(args, callback) {
     }
 }
 var addon = new Stremio.Server({
-    "stream.get": function(args, callback, user) {
-        pipe.push(getStream, args, function(err, resp) { callback(err, resp ? (resp[0] || null) : undefined) })
-    },
     "stream.find": function(args, callback, user) {
         pipe.push(getStream, args, function(err, resp) { callback(err, resp || undefined) })
     },
