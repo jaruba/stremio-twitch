@@ -112,7 +112,9 @@ function getStream(args, callback) {
                 callback(null, [{
                     availability: 1,
                     url: mrl,
+                    title: 'HD',
                     tag: ['hls'],
+                    isFree: 1,
                     twitch_id: args.query.twitch_id
                 }]);
             }
