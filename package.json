@@ -24,7 +24,6 @@
   },
   "homepage": "https://github.com/jaruba/stremio-twitch",
   "dependencies": {
-    "bagpipe": "Ivshti/bagpipe",
     "catch-my-exceptions": "^1.0.1",
     "lodash": "^3.10.1",
     "needle": "^0.11.0",
