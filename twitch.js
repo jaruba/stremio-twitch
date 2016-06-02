@@ -1,7 +1,6 @@
 var Stremio = require("stremio-addons");
 var needle = require("needle");
 var _ = require("lodash");
-var bagpipe = require("bagpipe");
 
 var twitch_chans = [];
 
@@ -21,7 +20,6 @@ var manifest = {
     sorts: [{prop: "popularities.twitch", name: "Twitch.tv", types:["tv"]}]
 };
 
-var pipe = new bagpipe(1);
 var expire = [];
 
 // Get all channels
@@ -60,7 +58,8 @@ function twitchStreams(cb, limit, offset) {
             });
             expire[offset] = Date.now() + 1800000; // expire in 30 mins
             cb && cb(null, twitch_chans[offset]);
-        }
+        } else if (cb)
+            cb(new Error('Network Error'));
     });
 }
 
@@ -93,7 +92,8 @@ function searchMeta(args, cb) {
                 });
             });
             cb && cb(null, { results: results, query: args.query });
-        }
+        } else if (cb)
+            cb(new Error('Network Error'));
     });
 }
 
@@ -114,10 +114,13 @@ function getStream(args, callback) {
                 callback(null, [{
                     availability: 1,
                     url: mrl,
+                    title: 'HD',
                     tag: ['hls'],
+                    isFree: 1,
                     twitch_id: args.query.twitch_id
                 }]);
-            }
+            } else if (callback)
+                callback(new Error('Network Error'));
         });
     } else
         callback(new Error('Stream Missing'))
@@ -130,7 +133,7 @@ function getMeta(args, callback) {
         var found = twitch_chans.some( function(chans) {
             return chans.some( function(el) {
                 if (el.id == 'twitch_id:' + args.query.twitch_id) {
-                    callback(null, [el]);
+                    callback(null, el);
                     return true;
                 }
             });
@@ -142,7 +145,7 @@ function getMeta(args, callback) {
                     return;
                 }
                 if (res && res.body) {
-                    callback(null, [{
+                    callback(null, {
                         id: 'twitch_id:' + args.query.twitch_id,
                         name: res.body.status,
                         poster: res.body.video_banner,
@@ -153,14 +156,14 @@ function getMeta(args, callback) {
                         genre: [ 'Entertainment' ],
                         isFree: 1,
                         type: 'tv'
-                    }]);
-                } else
+                    });
+                } else if (callback)
                     callback(new Error('No Results'));
             });
         }
     } else {
         twitchStreams(function(err, chans) {
-            if (err) cb(err);
+            if (err) callback(err);
             else {
                 callback(null, args.limit ? chans.slice(0, args.limit) : chans);
             }
@@ -168,26 +171,10 @@ function getMeta(args, callback) {
     }
 }
 var addon = new Stremio.Server({
-    "stream.find": function(args, callback, user) {
-        pipe.push(getStream, args, function(err, resp) { callback(err, resp || undefined) })
-    },
-    "meta.get": function(args, callback, user) {
-        args.projection = args.projection || { }; // full
-        pipe.push(getMeta, _.extend(args, { limit: 1 }), function(err, res) { 
-            if (err) return callback(err);
-
-            res = res && res[0];
-            if (! res) return callback(null, null);
-
-            callback(null, res);
-        });
-    },
-    "meta.search": function(args, callback, user) {
-        pipe.push(searchMeta, args, callback);
-    },
-    "meta.find": function(args, callback, user) {
-        pipe.push(getMeta, args, callback); // push to pipe so we wait for channels to be crawled
-    }
+    "stream.find": getStream,
+    "meta.get": getMeta,
+    "meta.search": searchMeta,
+    "meta.find": getMeta
 }, { stremioget: true, cacheTTL: { "meta.find": 30*60, "stream.find": 19*60, "meta.get": 4*60*60 }, allow: ["http://api8.herokuapp.com","http://api9.strem.io"] /* secret: mySecret */ }, manifest);
 
 var server = require("http").createServer(function (req, res) {
