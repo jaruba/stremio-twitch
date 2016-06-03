@@ -47,7 +47,6 @@ function twitchStreams(cb, limit, offset) {
                     name: el.channel.status,
                     poster: el.preview.medium,
                     posterShape: 'landscape',
-                    backgroundShape: 'contain',
                     logoShape: 'hidden',
                     banner: el.channel.video_banner || el.preview.template.replace('{width}', '1920').replace('{height}', '1080'),
                     genre: [ 'Entertainment' ],
