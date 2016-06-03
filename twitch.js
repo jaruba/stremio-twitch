@@ -17,7 +17,8 @@ var manifest = {
     endpoint: "http://twitch.strem.io/stremioget/stremio/v1",
     name: pkg.displayName, version: pkg.version, description: pkg.description,
     isFree: true,
-    sorts: [{prop: "popularities.twitch", name: "Twitch.tv", types:["tv"]}]
+    sorts: [{prop: "popularities.twitch", name: "Twitch.tv", types:["tv"]}],
+    boardShowControls: true
 };
 
 var expire = [];
@@ -46,7 +47,6 @@ function twitchStreams(cb, limit, offset) {
                     name: el.channel.status,
                     poster: el.preview.medium,
                     posterShape: 'landscape',
-                    backgroundShape: 'contain',
                     logoShape: 'hidden',
                     banner: el.channel.video_banner || el.preview.template.replace('{width}', '1920').replace('{height}', '1080'),
                     genre: [ 'Entertainment' ],

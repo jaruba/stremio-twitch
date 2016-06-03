@@ -27,7 +27,7 @@
     "catch-my-exceptions": "^1.0.1",
     "lodash": "^3.10.1",
     "needle": "^0.11.0",
-    "stremio-addons": "^1.30.0"
+    "stremio-addons": "Ivshti/stremio-addons"
   },
   "devDependencies": {
     "tape": "4.x.x"
