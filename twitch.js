@@ -17,7 +17,8 @@ var manifest = {
     endpoint: "http://twitch.strem.io/stremioget/stremio/v1",
     name: pkg.displayName, version: pkg.version, description: pkg.description,
     isFree: true,
-    sorts: [{prop: "popularities.twitch", name: "Twitch.tv", types:["tv"]}]
+    sorts: [{prop: "popularities.twitch", name: "Twitch.tv", types:["tv"]}],
+    boardShowControls: true
 };
 
 var expire = [];
