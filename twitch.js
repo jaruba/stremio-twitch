@@ -83,7 +83,7 @@ function searchMeta(args, cb) {
                     posterShape: 'landscape',
                     backgroundShape: 'contain',
                     logoShape: 'hidden',
-                    banner: el.channel.video_banner || el.preview.template.replace('{width}', '1920').replace('{height}', '1080'),
+                    banner: el.preview.template.replace('{width}', '1920').replace('{height}', '1080'),
                     genre: [ 'Entertainment' ],
                     isFree: 1,
                     popularity: el.viewers,
@@ -148,11 +148,11 @@ function getMeta(args, callback) {
                     callback(null, {
                         id: 'twitch_id:' + args.query.twitch_id,
                         name: res.body.status,
-                        poster: res.body.video_banner,
+                        poster: 'https://static-cdn.jtvnw.net/previews-ttv/live_user_' + args.query.twitch_id + '-320x180.jpg',
                         posterShape: 'landscape',
                         backgroundShape: 'contain',
                         logoShape: 'hidden',
-                        banner: res.body.video_banner,
+                        banner: 'https://static-cdn.jtvnw.net/previews-ttv/live_user_' + args.query.twitch_id + '-1920x1080.jpg',
                         genre: [ 'Entertainment' ],
                         isFree: 1,
                         type: 'tv'
