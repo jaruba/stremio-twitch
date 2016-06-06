@@ -177,14 +177,15 @@ var addon = new Stremio.Server({
     "meta.find": getMeta
 }, { stremioget: true, cacheTTL: { "meta.find": 30*60, "stream.find": 19*60, "meta.get": 4*60*60 }, allow: ["http://api8.herokuapp.com","http://api9.strem.io"] /* secret: mySecret */ }, manifest);
 
+if (module.parent) { module.exports = addon; } else {
 var server = require("http").createServer(function (req, res) {
     addon.middleware(req, res, function() { res.end() }); // wire the middleware - also compatible with connect / express
 }).on("listening", function()
 {
     console.log("Twitch.tv Stremio Addon listening on "+server.address().port);
 })
-if (module.parent) module.exports = server;
-else server.listen(process.env.PORT || 9028);
+server.listen(process.env.PORT || 9028);
 
 var catchMyExceptions = require('catch-my-exceptions');
 if (process.env.SLACK_HOOK) catchMyExceptions(process.env.SLACK_HOOK, { slackUsername: "twitch" });
+}
