@@ -2,6 +2,8 @@ var Stremio = require("stremio-addons");
 var needle = require("needle");
 var _ = require("lodash");
 
+var twitch_head = { headers: { 'Client-ID': process.env.TWITCH_CLIENT_ID } };
+
 var twitch_chans = [];
 
 var stremioCentral = "http://api9.strem.io";
@@ -33,7 +35,7 @@ function twitchStreams(cb, limit, offset) {
         }
     }
 
-    needle.get('https://api.twitch.tv/kraken/streams?limit=' + (limit || 75) + '\u0026offset=' + (offset || 0), function(err, res) {
+    needle.get('https://api.twitch.tv/kraken/streams?limit=' + (limit || 75) + '\u0026offset=' + (offset || 0), twitch_head, function(err, res) {
         if (err) {
             cb && cb(err);
             return;
@@ -67,7 +69,7 @@ function searchMeta(args, cb) {
 
     var searcher = encodeURIComponent(args.query).split('%20').join('+');
 
-    needle.get('https://api.twitch.tv/kraken/search/streams?limit=' + (args.limit || 75) + '&offset=' + (args.skip || 0) + '&q=' + searcher, function(err, res) {
+    needle.get('https://api.twitch.tv/kraken/search/streams?limit=' + (args.limit || 75) + '&offset=' + (args.skip || 0) + '&q=' + searcher, twitch_head, function(err, res) {
         if (err) {
             cb && cb(err);
             return;
@@ -100,7 +102,7 @@ function searchMeta(args, cb) {
 function getStream(args, callback) {
     var channel = args.query.twitch_id;
     if (channel) {
-        needle.get('http://api.twitch.tv/api/channels/' + channel + '/access_token', function(err, res) {
+        needle.get('http://api.twitch.tv/api/channels/' + channel + '/access_token', twitch_head, function(err, res) {
             if (err) {
                 callback(err);
                 return;
@@ -139,7 +141,7 @@ function getMeta(args, callback) {
             });
         });
         if (!found) {
-            needle.get('http://api.twitch.tv/api/channels/' + args.query.twitch_id, function(err, res) {
+            needle.get('http://api.twitch.tv/api/channels/' + args.query.twitch_id, twitch_head, function(err, res) {
                 if (err) {
                     callback(err);
                     return;
