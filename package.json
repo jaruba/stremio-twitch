@@ -1,12 +1,11 @@
 {
   "name": "stremio-twitch",
   "displayName": "Twitch.tv",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "Live Streams from Twitch.tv",
   "main": "twitch.js",
   "scripts": {
-    "test": "tape test/*",
-    "start": "node ./twitch.js"
+    "start": "node ./index.js"
   },
   "repository": {
     "type": "git",
@@ -24,12 +23,8 @@
   },
   "homepage": "https://github.com/jaruba/stremio-twitch",
   "dependencies": {
-    "catch-my-exceptions": "^1.0.1",
     "lodash": "^3.10.1",
     "needle": "^0.11.0",
-    "stremio-addons": "Ivshti/stremio-addons"
-  },
-  "devDependencies": {
-    "tape": "4.x.x"
+    "stremio-addon-sdk": "^0.6.4"
   }
 }
