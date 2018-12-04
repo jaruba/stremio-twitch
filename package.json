@@ -3,7 +3,7 @@
   "displayName": "Twitch.tv",
   "version": "0.2.0",
   "description": "Live Streams from Twitch.tv",
-  "main": "twitch.js",
+  "main": "index.js",
   "scripts": {
     "start": "node ./index.js"
   },
