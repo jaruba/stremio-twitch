@@ -1,0 +1,7 @@
+{
+    "name": "stremio-twitch",
+    "version": 1,
+    "env": {
+      "TWITCH_CLIENT_ID": "@twitch-id"
+    }
+}
