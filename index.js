@@ -45,7 +45,7 @@ needle.get('https://api.twitch.tv/helix/games/top?first=100', twitch_head, (err,
                 type: 'tv',
                 id: 'twitch_catalog',
                 genres,
-                extraSupported: [
+                extra: [
                     { name: 'genre' },
 //                    { name: 'search'},
                     { name: 'skip' }
